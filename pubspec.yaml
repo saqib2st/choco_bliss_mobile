@@ -10,6 +10,8 @@ dependencies:
   get: 4.6.6
   flutter: 
     sdk: flutter
+  printing: ^5.9.0
+  pdf: ^3.6.0
 
 dev_dependencies: 
   flutter_lints: 4.0.0
