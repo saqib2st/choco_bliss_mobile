@@ -1,14 +1,17 @@
 import 'package:choco_bliss_mobile/app/data/color_const.dart';
-import 'package:choco_bliss_mobile/app/modules/home/views/widgets/option_widget.dart';
+import 'package:choco_bliss_mobile/app/modules/controls/views/Items.dart';
+import 'package:choco_bliss_mobile/app/modules/controls/views/categories.dart';
+import 'package:choco_bliss_mobile/app/modules/controls/views/edit_carousel.dart';
+import 'package:choco_bliss_mobile/app/modules/controls/views/editgalleryImage.dart';
+import 'package:choco_bliss_mobile/app/modules/controls/views/widgets/option_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
-import '../controllers/home_controller.dart';
+import '../controllers/controls_controller.dart';
 
-class Controls extends GetView<HomeController> {
-  const Controls({super.key});
-
+class ControlsView extends GetView<ControlsController> {
+  const ControlsView({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,14 +26,18 @@ class Controls extends GetView<HomeController> {
             EditOptionCard(
               title: 'Edit Slider/Carousel Images',
               icon: Icons.slideshow,
-              onTap: () {
+              onTap: () async {
+                controller.fetchedList.value = await controller.getImages('slider');
+                Get.to(()=>const EditCarousel());
                 // Navigate to slider images editor
               },
             ),
             EditOptionCard(
               title: 'Edit Gallery Images',
               icon: Icons.image,
-              onTap: () {
+              onTap: () async {
+                controller.fetchedList.value = await controller.getImages('gallery');
+                Get.to(()=>const EditGalleryImage());
                 // Navigate to gallery images editor
               },
             ),
@@ -39,6 +46,7 @@ class Controls extends GetView<HomeController> {
               icon: Icons.category,
               onTap: () {
                 // Navigate to category editor
+                Get.to(()=>const CategoryListScreen());
               },
             ),
             EditOptionCard(
@@ -46,6 +54,7 @@ class Controls extends GetView<HomeController> {
               icon: Icons.edit,
               onTap: () {
                 // Navigate to item editor
+                Get.to(()=>const ItemsListScreen());
               },
             ),
           ],

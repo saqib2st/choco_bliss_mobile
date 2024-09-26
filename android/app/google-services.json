@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "419858186358",
+    "firebase_url": "https://chocobliss-e2bc5-default-rtdb.firebaseio.com",
+    "project_id": "chocobliss-e2bc5",
+    "storage_bucket": "chocobliss-e2bc5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:419858186358:android:e152167049d3fc814adf57",
+        "android_client_info": {
+          "package_name": "com.choco_bliss.uk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-9LsysDnSVbCfLKE33cjNzl7un0tD8FU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

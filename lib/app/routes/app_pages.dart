@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../modules/controls/bindings/controls_binding.dart';
+import '../modules/controls/views/controls_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/orders/bindings/orders_binding.dart';
@@ -29,6 +31,11 @@ class AppPages {
       name: _Paths.ORDERS,
       page: () => const OrdersView(),
       binding: OrdersBinding(),
+    ),
+    GetPage(
+      name: _Paths.CONTROLS,
+      page: () => const ControlsView(),
+      binding: ControlsBinding(),
     ),
   ];
 }

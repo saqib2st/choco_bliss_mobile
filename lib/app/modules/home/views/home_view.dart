@@ -1,4 +1,5 @@
 import 'package:choco_bliss_mobile/app/data/color_const.dart';
+import 'package:choco_bliss_mobile/app/modules/controls/controllers/controls_controller.dart';
 import 'package:choco_bliss_mobile/app/modules/orders/controllers/orders_controller.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +28,10 @@ class HomeView extends GetView<HomeController> {
           if(index == 1 ){
             if (!Get.isRegistered<OrdersController>()) {
               Get.put<OrdersController>(OrdersController());
+            }
+          }else if(index == 0 ){
+            if (!Get.isRegistered<ControlsController>()) {
+              Get.put<ControlsController>(ControlsController());
             }
           }
         },

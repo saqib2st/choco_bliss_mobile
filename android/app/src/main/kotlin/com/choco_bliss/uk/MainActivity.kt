@@ -1,4 +1,4 @@
-package com.chocoBlissUk.choco_bliss_mobile
+package com.choco_bliss.uk
 
 import io.flutter.embedding.android.FlutterActivity
 
