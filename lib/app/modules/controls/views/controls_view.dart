@@ -52,9 +52,12 @@ class ControlsView extends GetView<ControlsController> {
             EditOptionCard(
               title: 'Edit Item',
               icon: Icons.edit,
-              onTap: () {
+              onTap: () async {
+                controller.categoriesList.value = await controller.fetchCategory();
                 // Navigate to item editor
-                Get.to(()=>const ItemsListScreen());
+                if (controller.categoriesList.isNotEmpty) {
+                  Get.to(()=>const ItemsListScreen());
+                }
               },
             ),
           ],

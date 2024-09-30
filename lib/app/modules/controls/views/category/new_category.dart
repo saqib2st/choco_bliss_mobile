@@ -63,7 +63,10 @@ class AddNewCategoryView extends GetView<ControlsController> {
                         // Image Picker
                         GestureDetector(
                           onTap: () {
-                            controller.pickImage();
+                            controller.pickImage(
+                              controller.selectedImage,
+                              controller.selectedImageUrlItem
+                            );
                           },
                           child: Obx(() {
                             return controller.selectedImageUrl.isNotEmpty

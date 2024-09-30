@@ -9,7 +9,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/get_rx.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ControlsController extends GetxController {
@@ -164,26 +163,33 @@ class ControlsController extends GetxController {
 // <---------------------------------------------------CATEGORY------------------------------------------------------------->
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
-  RxList<Category> categoriesList = <Category>[].obs;
+  RxList<String> categoriesList = <String>[].obs;
 
   var selectedImage = Rx<File?>(null); // Observable for image
   RxString selectedImageUrl = ''.obs; // Observable for image
   var isLoading = false.obs; // Observable for loading state
 
   // Image Picker Function
-  Future<void> pickImage() async {
+  Future<void> pickImage(Rx<File?> imageFile, RxString prefetchedString) async {
     final ImagePicker _picker = ImagePicker();
     final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedImage != null) {
-      selectedImageUrl.value = '';
-      selectedImage.value = File(pickedImage.path);
+      prefetchedString.value = '';
+      imageFile.value = File(pickedImage.path);
     }
   }
 
   Stream<List<Category>> readCategories() {
     return FirebaseFirestore.instance.collection('categories').snapshots().map((snapshot) =>
         snapshot.docs.map((doc) => Category.fromFirestore(doc)).toList());
+  }
+  Future<List<String>> fetchCategory() async{
+    AppLoader.showLoader();
+    var snapShots = await _firestore.collection('categories').get();
+    List<String> categoriesList = snapShots.docs.map((doc)=>Category.fromFirestore(doc).name).toList();
+    AppLoader.hideLoader();
+    return categoriesList;
   }
 
   // Function to upload image and category data to Firebase
@@ -308,12 +314,151 @@ class ControlsController extends GetxController {
 
 
 // <---------------------------------------------------ITEMS------------------------------------------------------------->
+  final TextEditingController itemNmeController = TextEditingController();
+  final TextEditingController itemPriceController = TextEditingController();
+  final TextEditingController itemDescriptionController = TextEditingController();
+  final TextEditingController shortDescriptionController = TextEditingController();
+  final TextEditingController ratingController = TextEditingController();
+  String? selectedCategory;
+
+  var imageFile = Rx<File?>(null); // Observable for image
+  RxString selectedImageUrlItem = ''.obs; // Observable for image
+
 
 
   Stream<List<Item>> readItems() {
     return FirebaseFirestore.instance.collection('items').snapshots().map((snapshot) =>
         snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList());
   }
+
+  Future<String?> uploadImage(File image) async {
+    try {
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      Reference storageRef = FirebaseStorage.instance.ref().child('item_images/$fileName');
+      UploadTask uploadTask = storageRef.putFile(image);
+      TaskSnapshot snapshot = await uploadTask;
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      Get.snackbar('Error', 'Image upload failed: $e');
+      return null;
+    }
+  }
+
+  // Add new item to Firestore
+  Future<void> addItem(
+      String name,
+      String price,
+      String description,
+      String category,
+      String shortDescription,
+      double rating,
+      ) async {
+    if (imageFile.value == null) {
+      Get.snackbar('Error', 'Please select an image');
+      return;
+    }
+
+    isLoading.value = true;
+
+    try {
+      // Upload the image to Firebase Storage
+      String? imageUrl = await uploadImage(imageFile.value!);
+      if (imageUrl == null) return;
+
+      // Add the new item to Firestore
+      await FirebaseFirestore.instance.collection('items').add({
+        'name': name,
+        'price': price,
+        'description': description,
+        'imageUrl': imageUrl,
+        'category': category,
+        'shortDescription': shortDescription,
+        'rating': rating,
+      });
+
+      Get.back();
+      Get.snackbar('Success', 'Item added successfully');
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to add item: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  Future<void> deleteItem(String docId, String imageUrl) async {
+    AppLoader.showLoader();
+    try {
+      // Delete the image from Firebase Storage
+      Reference storageRef = FirebaseStorage.instance.refFromURL(imageUrl);
+      await storageRef.delete();
+
+      // Delete the category document from Firestore
+      await FirebaseFirestore.instance.collection('items').doc(docId).delete();
+
+      AppLoader.hideLoader();
+      Get.snackbar('Success', 'Category deleted successfully!',
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      AppLoader.hideLoader();
+      Get.snackbar('Error', 'Error deleting category: $e',
+          snackPosition: SnackPosition.BOTTOM);
+    }finally{
+      AppLoader.hideLoader();
+    }
+  }
+
+  // Edit an existing item in Firestore
+  Future<void> editItem(
+      String itemId, // ID of the item to edit
+      ) async {
+    isLoading.value = true;
+
+    try {
+      String? imageUrl;
+
+      // If a new image is selected, upload it to Firebase Storage
+      if (imageFile.value != null) {
+        imageUrl = await uploadImage(imageFile.value!);
+        if (imageUrl == null) return;
+      }
+
+      // Prepare updated data
+      Map<String, dynamic> updatedData = {
+        'name': itemNmeController.text,
+        'price': itemPriceController.text,
+        'description': itemDescriptionController.text,
+        'category': selectedCategory,
+        'shortDescription': shortDescriptionController.text,
+        'rating': double.tryParse(ratingController.text),
+      };
+
+      // If a new image URL exists, update it
+      if (imageUrl != null) {
+        updatedData['imageUrl'] = imageUrl;
+      }
+
+      // Update the item in Firestore
+      await FirebaseFirestore.instance.collection('items').doc(itemId).update(updatedData);
+      resetItemFields();
+      Get.back();
+      Get.snackbar('Success', 'Item updated successfully');
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update item: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void resetItemFields() {
+    itemNmeController.clear(); // Clears the text controller
+    shortDescriptionController.clear(); // Clears the short description
+    itemPriceController.clear(); // Clears the price
+    ratingController.text = '0.0'; // Resets rating to 0.0
+    selectedCategory = ''; // Resets selected category
+    selectedImageUrlItem.value = ''; // Resets image URL
+  }
+
 
 
 }

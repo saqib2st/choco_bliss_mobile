@@ -1,10 +1,11 @@
 import 'package:choco_bliss_mobile/app/data/Models/items.dart';
 import 'package:choco_bliss_mobile/app/data/color_const.dart';
 import 'package:choco_bliss_mobile/app/modules/controls/controllers/controls_controller.dart';
-import 'package:choco_bliss_mobile/app/modules/controls/views/category/new_category.dart';
 import 'package:choco_bliss_mobile/app/modules/controls/views/widgets/item_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'Item/new_item_view.dart';
 
 class ItemsListScreen extends GetView<ControlsController> {
   const ItemsListScreen({super.key});
@@ -48,6 +49,19 @@ class ItemsListScreen extends GetView<ControlsController> {
                       final item = items[index];
                       return ItemCard(
                         item: item,
+                        onPressEdit: (){
+                          controller.itemNmeController.text = item.name;
+                          controller.itemDescriptionController.text = item.description;
+                          controller.shortDescriptionController.text = item.shortDescription;
+                          controller.itemPriceController.text = item.price;
+                          controller.ratingController.text = item.rating.toString();
+                          controller.selectedCategory = item.category;
+                          controller.selectedImageUrlItem.value = item.imageUrl;
+                          Get.to(()=>AddNewItemView(item: item));
+                          },
+                        onPressDelete: (){
+                          controller.deleteItem(item.id, item.imageUrl);
+                        },
                       );
                     },
                   );
@@ -59,9 +73,8 @@ class ItemsListScreen extends GetView<ControlsController> {
               child: ElevatedButton.icon(
                   icon: const Icon(Icons.add),
                   label: const Text("Add New"),
-                  onPressed: ()
-                  {
-                    Get.to(()=>const AddNewCategoryView());
+                  onPressed: () {
+                    Get.to(()=>const AddNewItemView());
                   } // Upload action
               ),
             ),

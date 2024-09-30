@@ -9,7 +9,7 @@ class Item {
   final String imageUrl;
   final String category;
   final String shortDescription;
-  final double rating;
+  final String rating;
 
   Item({required this.id,required this.name,required this.price,required this.description, required this.imageUrl,required this.category, required this.shortDescription,required this.rating});
 
@@ -24,7 +24,7 @@ class Item {
   imageUrl:data['imageUrl'],
   category:data['category'],
   shortDescription:data['shortDescription'],
-  rating: data['shortDescription']
+  rating: data['rating']
   );
   }
 }
